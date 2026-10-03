@@ -50,7 +50,7 @@ export default function FormAtividade({ initialData = null,onSaved}){
         if(initialData){
             setForm({
                 id: initialData.id,
-                data: initialData.data ?? "",
+                data: initialData.dataInput ?? "",
                 descricao: initialData.descricao ?? "",
                 horario: initialData.horario ?? "",
                 nome: initialData.nome ?? "",
