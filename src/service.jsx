@@ -117,17 +117,68 @@ async function getParticipantes(){
     return await res.json();
 }
 
+async function getParticipanteById(id){
+    const res = await fetch(apiUrl + "/participante/getById/"+id);
+    return await res.json();
+}
+
+async function getAtividadesDisponiveis(id){
+    const res = await fetch(apiUrl + "/atividade/disponiveis/"+id);
+    return await res.json();
+}
+
+
+async function cancelarInscricao(id){
+    const res = await fetch(apiUrl + "/inscricao/cancelar/"+id, {
+        method: "POST",
+        headers:{
+            "Content-Type": "application/json"
+        },
+    });
+
+    return await res.json();
+}
+
+async function inscreverAtividade({idAtividade,idParticipante}){
+    const res = await fetch(apiUrl + "/inscricao/inscrever/", {
+        method: "POST",
+        headers:{
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({data:{idAtividade: idAtividade, idParticipante:idParticipante}})
+    });
+
+    return await res.json();
+}
+
+async function redefinirSenha(id){
+    const res = await fetch(apiUrl + "/participante/redefinirSenha/"+id, {
+        method: "POST",
+        headers:{
+            "Content-Type": "application/json"
+        },
+    });
+
+    return await res.json();
+}
+
 
 export const service = {
     criarParticipante,
     editarParticipante,
+    redefinirSenha,
+
     editarParticipanteAdmin,
     loginAdmin,
     loginParticipante,
     getAtividades,
+    cancelarInscricao,
     getParticipantes,
     excluirAtividade,
     criarAtividade,
+    inscreverAtividade,
+    getAtividadesDisponiveis,
     editarAtividade,
-    excluirParticipante
+    excluirParticipante,
+    getParticipanteById
 }

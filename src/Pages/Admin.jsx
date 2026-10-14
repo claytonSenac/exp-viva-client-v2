@@ -15,6 +15,7 @@ export default function AdminPage(){
     const [modalConfirm, setModalConfirm] = useState({open:false,title:"", onConfirm:null});
 
     const [modalAtividade, setModalAtividade] = useState({open:false,initialData:null});
+    const [detailsAtividade, setDetailsAtividade] = useState({open:false,a:null});
     const [modalParticipante, setModalParticipante] = useState({open:false,initialData:null,isAdmin: false});
 
     async function loadData(){
@@ -65,6 +66,23 @@ export default function AdminPage(){
         return;
     }
 
+    async function handleRedefinirSenha(a){
+        if(!a) return null;
+
+        const res = await service.redefinirSenha(a.id);
+
+        if(!res || res.code !== 200 && res.code !== 201){
+            toast.error(res.text ?? "Erro ao excluir");
+            resetModalConfirm()
+            return;
+        }
+
+        toast.success(res.text);
+        await loadData();
+        resetModalConfirm()
+        return;
+    }
+
     function resetModalConfirm(){
         setModalConfirm({open:false,onConfirm:null,title:""});
     }
@@ -76,6 +94,8 @@ export default function AdminPage(){
     function handleNewParticipante(){
         setModalParticipante({open:true,initialData:null,isAdmin: false})
     }
+
+
 
     return (<>
         <div className="w-full flex flex-col flex-1 bg-blue-900 items-center justify-center p-4">
@@ -98,6 +118,9 @@ export default function AdminPage(){
                                 handleEdit={() => {
                                   setModalAtividade({open:true,initialData:a})
                                 }}
+                                handleDetails={() => {
+                                  setDetailsAtividade({open:true,a:a})
+                                }}
                                 />
                             ))}
                         </div>
@@ -117,6 +140,11 @@ export default function AdminPage(){
                                     }}
                                     handleEdit={() => {
                                         setModalParticipante({open:true,initialData:a,isAdmin:true})
+                                    }}
+                                    handleRedefinirSenha={() => {
+                                      setModalConfirm({open:true, title: "Deseja redefinir a senha?", onConfirm:() => {
+                                        handleRedefinirSenha(a)
+                                      }})
                                     }}
                                 />
                             ))}
@@ -153,11 +181,15 @@ export default function AdminPage(){
                 title={modalConfirm.title}
                 open={modalConfirm.open}
             />
+            <DetailsAtividade open={detailsAtividade.open} a={detailsAtividade.a} onClose={async () => {
+              setDetailsAtividade({open:false, a:null});
+              await loadData()
+            }} />
         </div>
     </>)
 }
 
-function AtividadeItem({a,handleDelete,handleEdit}){
+export function AtividadeItem({a,handleDelete,handleEdit,handleDetails}){
     return (
         <>
             <li className="bg-blue-900 text-white list-none p-4 rounded  flex flex-col justify-between gap-4">
@@ -167,9 +199,7 @@ function AtividadeItem({a,handleDelete,handleEdit}){
                 <p>{a.data} as {a.horario}</p>
                 <div className="flex flex-col gap-4">
                     <Button text="Editar" newClass="bg-yellow-400 font-semibold" onClick={handleEdit}/>
-                    <Button text="Detalhes" newClass="font-semibold" onClick={() => {
-                      alert("Em desenvolvimento MODULO D")
-                    }}/>
+                    <Button text="Detalhes" newClass="font-semibold" onClick={handleDetails}/>
                     <Button text="Excluir" newClass="bg-red-400 font-semibold" onClick={handleDelete}/>
                 </div>
             </li>
@@ -178,7 +208,7 @@ function AtividadeItem({a,handleDelete,handleEdit}){
 }
 
 
-function ParticipanteItem({a,handleDelete,handleEdit}){
+function ParticipanteItem({a,handleDelete,handleEdit,handleRedefinirSenha}){
     return (
         <>
             <li className="bg-blue-900 text-white list-none p-4 rounded  flex flex-col justify-between gap-4">
@@ -186,9 +216,7 @@ function ParticipanteItem({a,handleDelete,handleEdit}){
                 <p>Email: {a.email}</p>
                 <div className="flex flex-col gap-4">
                     <Button text="Editar" newClass="bg-yellow-400 font-semibold" onClick={handleEdit}/>
-                    <Button text="Redefinir Senha" newClass="font-semibold text-white bg-black " onClick={() => {
-                      alert("Em desenvolvimento MODULO D")
-                    }}/>
+                    <Button text="Redefinir Senha" newClass="font-semibold text-white bg-black " onClick={handleRedefinirSenha}/>
                     <Button text="Excluir" newClass="bg-red-400 font-semibold" onClick={handleDelete}/>
                 </div>
             </li>
@@ -214,4 +242,54 @@ function ModalParticipante({open,initialData,onSaved,onClose,isAdmin}){
             </Modal>
         </>
     )
+}
+
+function DetailsAtividade({open,a,onClose}){
+    if(!a || !open) return null;
+    const [modalConfirm, setModalConfirm] = useState({open:false,title:"", onConfirm:null});
+
+    async function handleCancelarInscricao(id){
+        const res = await service.cancelarInscricao(id);
+
+        if(!res || res.code !== 200 && res.code !== 201){
+            toast.error(res.text ?? "Erro ao buscar detalhes");
+            return;
+        }
+
+        toast.info(res.text);
+         onClose();
+        setModalConfirm({open:false,title:"", onConfirm:null});
+        return;
+    }
+
+    return(<>
+        <Modal open={true} onClose={onClose} title={"Detalhes da Atividade"} newClass="z-40">
+            <div className="w-full p-4 flex flex-col gap-4">
+                <h2><span className="font-bold">Nome: </span>{a.nome}</h2>
+                <p className="wrap-break-word">{a.descricao}</p>
+                <h2><strong>Vagas:</strong> {a.vagas_restantes} / {a.vagas}</h2>
+                <h2><strong>Horario: </strong>{a.horario}</h2>
+                <div className="p-4 border-2 border-blue-400 rounded bg-gray-200 flex flex-col gap-4">
+                    <h3 className="font-semibold">Inscrições:</h3>
+                    <div className="flex flex-col gap-4 ">
+                        {a.atividade_participante.map((i)=>(
+                            <li className="list-none flex bg-white p-2 items-center rounded justify-between">
+                                <h2>{i.participante.nome}</h2>
+                                <Button  text="Cancelar" onClick={async () => {
+                                   setModalConfirm({open:true, title: "Cancelar Inscricao", onConfirm: () => {
+                                         handleCancelarInscricao(i.id)
+                                    }})
+                                }} newClass="bg-red-400"/>
+                            </li>
+                        ))}
+                    </div>
+                </div>
+            </div>
+            <ModalConfirm onClose={() => {
+              setModalConfirm({open:false, onConfirm:() => {
+                
+              }, title:""})
+            }} onConfirm={modalConfirm.onConfirm} open={modalConfirm.open} title={modalConfirm.title}/>
+        </Modal>
+    </>)
 }

@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Layout from './Pages/Layout';
 import Home from './Pages/Home';
 import AdminPage from './Pages/Admin';
+import ParticipantePage from './Pages/Participante';
 
 
 const r = createBrowserRouter([
@@ -18,6 +19,10 @@ const r = createBrowserRouter([
       {
         path: "admin/:id",
         element: <AdminPage />
+      },
+          {
+        path: "participante/:id",
+        element: <ParticipantePage />
       }
     ]
   }

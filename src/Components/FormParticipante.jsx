@@ -91,7 +91,7 @@ export default function FormParticipante({isAdmin = false, initialData = null,on
                             <InputForm name={"senha"} type={showSenha ? "text" : "password"} value={form.senha} onChange={handleInputChange}/>
                         </section>
                         <section className="flex gap-4 flex-wrap justify-between">
-                            <label htmlFor="confirmSenha">Confirme Senha:</label>
+                            <label htmlFor="confirmSenha">{initialData ? "Nova Senha:" : "Confirme Senha:"}</label>
                             <InputForm name={"confirmSenha"} type={showSenha ? "text" : "password"} value={form.confirmSenha} onChange={handleInputChange} />                
                         </section>
                         
