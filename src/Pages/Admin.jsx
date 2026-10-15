@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import Modal from "../Components/Modal";
 import FormAtividade from "../Components/FormAtividade";
 import FormParticipante from "../Components/FormParticipante";
+import { AtividadeListItem } from "./Participante";
 
 export default function AdminPage(){
 
@@ -18,19 +19,51 @@ export default function AdminPage(){
     const [detailsAtividade, setDetailsAtividade] = useState({open:false,a:null});
     const [modalParticipante, setModalParticipante] = useState({open:false,initialData:null,isAdmin: false});
 
+    const [listAtividades, setListAtividades] = useState([]);
+    const [filterAtividades, setFilterAtividades] = useState({showMore:false, filter:""});
+    const [filterParticipante, setFilterParticipante] = useState({showMore:false, filter:""});
+    const [listParticipantes, setListParticipantes] = useState([]);
+
+    const [nextEvents, setNextEvents] = useState([]);
+    const [saude,setSaude] = useState(null);
+
     async function loadData(){
-        const [atividades,participantes] = await Promise.all([
+        const [atividades,participantes,proximasAtividades,saude] = await Promise.all([
             service.getAtividades(),
-            service.getParticipantes()
+            service.getParticipantes(),
+            service.getNextAtividades(),
+            service.getSaude()
         ]);
 
         setAtividades(atividades.data);
         setParticipantes(participantes.data);
+        setNextEvents(proximasAtividades.data);
+        setSaude(saude.data)
     };
 
     useEffect(() => {
         loadData();
     },[]);
+
+    useEffect(() => {
+        const filter = filterAtividades.filter.toLowerCase().trim();
+        const mapped = atividades.filter(
+            a=> a.nome.toLowerCase().trim().includes(filter) ||
+            a.descricao.toLowerCase().trim().includes(filter) ||
+            a.data.toLowerCase().trim().includes(filter) || 
+            a.horario.toLowerCase().trim().includes(filter) 
+        );
+        setListAtividades(mapped)
+    },[atividades,filterAtividades.filter]);
+
+    useEffect(() => {
+        const filter = filterParticipante.filter.toLowerCase().trim();
+        const mapped = participantes.filter(
+            a=> a.nome.toLowerCase().trim().includes(filter) ||
+            a.email.toLowerCase().trim().includes(filter)
+        );
+        setListParticipantes(mapped)
+    },[participantes,filterParticipante.filter]);
 
     async function handleDeleteAtividade(a){
         if(!a) return null;
@@ -88,27 +121,77 @@ export default function AdminPage(){
     }
 
     function handleNewAtividade(){
-        setModalAtividade({open:true,initialData:null})
+        setModalAtividade({open:true,initialData:null});
     }
 
     function handleNewParticipante(){
-        setModalParticipante({open:true,initialData:null,isAdmin: false})
+        setModalParticipante({open:true,initialData:null,isAdmin: false});
     }
 
 
 
     return (<>
-        <div className="w-full flex flex-col flex-1 bg-blue-900 items-center justify-center p-4">
+        <div className="w-full flex flex-col flex-1 bg-blue-900 items-center justify-center p-4 gap-4">
+            <h1 className="text-center text-2xl font-semibold text-white m-4">Dashboard</h1>
+            <div className="bg-white  max-w-11/12 w-full  grid grid-cols-1  rounded">
+                <div className="bg-white w-full min-h-50 rounded">
+                    <h2 className="text-2xl text-center font-semibold">Proximos Eventos:</h2>
+                    <div className="w-full  grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 p-2 gap-4">
+                        {nextEvents.map((a)=>(
+                            <li className="w-full bg-blue-900 text-white list-none p-4 rounded min-h-32 flex flex-col justify-between gap-4">
+                                <h2 className="text-center text-xl font-semibold">{a.nome}</h2>
+                                <p className="text-white text-center">Vagas restantes / Total de vagas</p>
+                                <p className="bg-white text-blue-900 w-fit p-2 rounded font-semibold mx-auto">{a.vagas_restantes} / {a.vagas}</p>
+                                <p className="font-bold text-center">{a.data} as {a.horario}</p>
+                            </li>
+                        ))}
+                    </div>
+                </div>
+                <div className="w-full min-h-50  bg-red  grid grid-cols-1 md:grid-cols-2 rounded-2xl">
+                        
+                    <div className=" text-black flex flex-col gap-4  font-semibold text-2xl items-center rounded-2xl p-4">
+                        <h2>Total de Cadastros:</h2>
+                        <div className="flex gap-4">
+                            <h2 className="rounded bg-blue-900 text-white flex items-center p-4 h-24">Atividades: {saude?.atividades ?? '-'}</h2>
+                            <h2 className="rounded bg-blue-900 text-white flex items-center p-4 h-24">Participantes: {saude?.participantes ?? '-'}</h2>
+                        </div>
+                    </div>
+                    <div className="w-full h-full p-4 flex flex-col gap-4">
+                        <h2 className="text-2xl text-center font-semibold">Atividade com menor aderencia:</h2>
+                            <li className=" bg-blue-900 text-white list-none p-4 rounded flex  justify-around items-center gap-4 h-24">
+                                <div>
+                                    <p>Atividade:</p>
+                                    <h2 className="text-center text-xl font-semibold">{saude?.atividade_menor_aprovacao.nome}</h2>
+                                </div>
+                                <div>
+                                    <p>Vagas Preenchidas / Total de vagas:</p>
+                                    <p className="bg-white text-blue-900 w-fit p-2 rounded font-semibold mx-auto">{saude?.atividade_menor_aprovacao.vagas - saude?.atividade_menor_aprovacao.vagas_restantes} / {saude?.atividade_menor_aprovacao.vagas}</p>
+                                </div>
+                            </li>
+                    </div>
+                </div>
+            </div>
             <div className="bg-white rounded max-w-11/12 w-full flex flex-col">
-                <h1>Painel Admin</h1>
-                <div className="grid grid-cols-1 md:grid-cols-2 w-full p-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 w-full p-4 gap-4 h-full items-start">
                     <div className="flex flex-col gap-4 p-4 border-2 border-blue-400 rounded-2xl">
-                        <div className="flex justify-between items-center">
+                        <div className="flex justify-between items-center flex-wrap">
                             <h2 className="font-semibold text-xl">Atividades</h2>
+                            <Button newClass="bg-blue-900" text={filterAtividades.showMore ? "Ver Menos" : "Ver Mais"} onClick={() => {
+                                setFilterAtividades((prev)=>({
+                                    ...prev,
+                                    showMore: !prev.showMore
+                                }))
+                            }}/>
                             <Button onClick={handleNewAtividade} text="Novo"/>
                         </div>
-                        <div className="grid w-full grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {atividades.map((a)=>(
+                        <input className="w-full border-2 rounded border-blue-400 px-4" placeholder="Filtre por nome, descrição,data e horario" type="text" value={filterAtividades.filter} onChange={(e) => {
+                          setFilterAtividades((prev)=>({
+                            ...prev,
+                            filter: e.target.value
+                          }))
+                        }} />
+                        <div className="grid w-full grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                            {listAtividades.slice(0, filterAtividades.showMore ? listAtividades.length : 3).map((a)=>(
                                 <AtividadeItem a={a}  
                                 handleDelete={() => {
                                   setModalConfirm({open:true,title:"Deseja Realmente excluir?", onConfirm:() => {
@@ -128,10 +211,22 @@ export default function AdminPage(){
                     <div className="flex flex-col gap-4 p-4 border-2 border-blue-400 rounded-2xl">
                         <div className="flex justify-between items-center">
                             <h2 className="font-semibold text-xl">Participantes</h2>
+                              <Button newClass="bg-blue-900" text={filterParticipante.showMore ? "Ver Menos" : "Ver Mais"} onClick={() => {
+                                setFilterParticipante((prev)=>({
+                                    ...prev,
+                                    showMore: !prev.showMore
+                                }))
+                            }}/>
                             <Button onClick={handleNewParticipante} text="Novo"/>
                         </div>
-                        <div className="grid w-full grid-cols-1 md:grid-cols-2  gap-4">
-                            {participantes.map((a)=>(
+                        <input className="w-full border-2 rounded border-blue-400 px-4" placeholder="Filtre por nome, descrição,data e horario" type="text" value={filterParticipante.filter} onChange={(e) => {
+                          setFilterParticipante((prev)=>({
+                            ...prev,
+                            filter: e.target.value
+                          }))
+                        }} />
+                        <div className="grid w-full grid-cols-1 xl:grid-cols-2  gap-4">
+                            {listParticipantes.slice(0, filterParticipante.showMore ? listParticipantes.length : 2).map((a)=>(
                                 <ParticipanteItem a={a}  
                                     handleDelete={() => {
                                         setModalConfirm({open:true,title:"Deseja Realmente excluir?", onConfirm:() => {
@@ -194,9 +289,10 @@ export function AtividadeItem({a,handleDelete,handleEdit,handleDetails}){
         <>
             <li className="bg-blue-900 text-white list-none p-4 rounded  flex flex-col justify-between gap-4">
                 <h2 className="text-center text-xl font-semibold">{a.nome}</h2>
+                <p className="text-white text-center">Vagas / Total vagas:</p>
                 <p className="bg-white text-blue-900 w-fit p-2 rounded font-semibold mx-auto">{a.vagas_restantes} / {a.vagas}</p>
                 <p>{a.descricao}</p>
-                <p>{a.data} as {a.horario}</p>
+                <p className="text-center font-semibold">{a.data} as {a.horario}</p>
                 <div className="flex flex-col gap-4">
                     <Button text="Editar" newClass="bg-yellow-400 font-semibold" onClick={handleEdit}/>
                     <Button text="Detalhes" newClass="font-semibold" onClick={handleDetails}/>
@@ -213,7 +309,8 @@ function ParticipanteItem({a,handleDelete,handleEdit,handleRedefinirSenha}){
         <>
             <li className="bg-blue-900 text-white list-none p-4 rounded  flex flex-col justify-between gap-4">
                 <h2 className="text-center text-xl font-semibold">{a.nome}</h2>
-                <p>Email: {a.email}</p>
+                <p><strong>Nome:</strong> {a.nome}</p>
+                <p><strong>Email: </strong>{a.email}</p>
                 <div className="flex flex-col gap-4">
                     <Button text="Editar" newClass="bg-yellow-400 font-semibold" onClick={handleEdit}/>
                     <Button text="Redefinir Senha" newClass="font-semibold text-white bg-black " onClick={handleRedefinirSenha}/>

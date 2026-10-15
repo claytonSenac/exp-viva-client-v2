@@ -74,7 +74,7 @@ export default function FormParticipante({isAdmin = false, initialData = null,on
 
     return(
         <>
-            <form className="flex flex-col gap-4 justify-between max-w-100 border-2 border-blue-400 rounded p-4">
+            <form className="flex flex-col gap-4 justify-between max-w-100 border-2 border-blue-400 rounded p-4 shadow-lg bg-white">
                 <h2 className="font-semibold text-xl">Participante:</h2>
                 <section className="flex gap-4 flex-wrap justify-between">
                     <label htmlFor="nome">Nome:</label>

@@ -10,7 +10,7 @@ export default function Modal({open, onClose, title,children,newClass = ''}){
                         {title && (
                             <h2 className="font-semibold text-xl">{title}</h2>
                         )}
-                        <Button text="Fechar" newClass="bg-red-400 text-white" onClick={onClose}/>
+                        <Button textColor="text-white" text="Fechar" newClass="bg-red-400" onClick={onClose}/>
                     </div>
                     {children}
                 </div>

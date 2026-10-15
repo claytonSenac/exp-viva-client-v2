@@ -8,6 +8,7 @@ import { service } from "../service";
 
 export default function Layout(){
     const [modalLogin, setModalLogin] = useState({open:false,isAdmin:false});
+    const nav = useNavigate();
 
     function resetLoginModal(){
         setModalLogin({open:false,isAdmin:false});
@@ -16,14 +17,16 @@ export default function Layout(){
     return(
         <>
             <div className="w-full min-h-dvh flex flex-col flex-1">
-                <header className="min-h-14 bg-blue-400 w-full flex justify-between px-4 items-center">
-                    <div className="p-2">
-                        <img className="w-full h-14" src="/imagens_Coronel_Fabriciano_02.png" alt="logo exp viva" />
+                <header className="min-h-14 bg-blue-400 w-full grid grid-cols-1 sm:grid-cols-2 flex-wrap p-4">
+                    <div className="p-2 flex sm:justify-start justify-center items-center w-full">
+                        <img className="transition hover:scale-105 cursor-pointer  h-14" src="/imagens_Coronel_Fabriciano_02.png" onClick={() => {
+                          nav("/")
+                        }} alt="logo exp viva" />
                     </div>
-                    <div className="flex gap-4 justify-between flex-wrap">
+                    <div className="flex w-full gap-4  justify-center sm:justify-end flex-wrap items-center">
                         <Button onClick={() => {
                           setModalLogin({open:true,isAdmin:true})
-                        }} text="Painel Admin" newClass="bg-white text-blue-900 font-semibold"/>
+                        }} text="Painel Admin" newClass="bg-white font-semibold" textColor="text-blue-900"/>
                         <Button onClick={() => {
                           setModalLogin({open:true,isAdmin:false})
                         }}  text="Painel Participante" newClass="bg-blue-900 text-white font-semibold"/>

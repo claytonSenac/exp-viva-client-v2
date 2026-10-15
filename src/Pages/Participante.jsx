@@ -73,18 +73,18 @@ export default function ParticipantePage(){
     return (
         <>
             <div className="w-full flex flex-col flex-1 bg-blue-900 items-center justify-center p-4">
-                <div className="bg-white rounded max-w-11/12 w-full flex flex-col p-4">
-                    <div className="p-4 w-full grid grid-cols-1 md:grid-cols-[1fr_3fr] justify-between gap-4">
+                <div className="bg-white rounded max-w-11/12 w-full flex flex-col p-4 gap-4">
+                    <div className="w-full grid grid-cols-1 md:grid-cols-[1fr_3fr] gap-4">
                         <div className="w-full">
                             <FormParticipante  isAdmin={false} initialData={p} onSaved={getDetails}/>
                         </div>
                         <div className="w-full border-2 border-blue-400 rounded p-4">
-                            <h2>Inscrições:</h2>
+                            <h2 className="font-semibold text-center text-2xl">Inscrições:</h2>
                             <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {p?.atividade_participante.map((i)=>(
-                                    <li className="w-full bg-blue-900 text-white p-4 rounded flex flex-col gap-4">
-                                        <p>{i.atividade.nome}</p>
-                                        <p>{i.atividade.data} as {i.atividade.horario}</p>
+                                    <li className="w-full bg-blue-900 min-h-48 justify-between text-white p-4 rounded flex flex-col gap-4">
+                                        <p className="text-center">{i.atividade.nome}</p>
+                                        <p className="font-semibold text-center">{i.atividade.data} as {i.atividade.horario}</p>
                                         <Button text="Cancelar" newClass="bg-red-400" onClick={() => {
                                           setModalConfirm({open:true,onConfirm: async () => {
                                             await handleCancelarInscricao(i.id)
@@ -95,8 +95,8 @@ export default function ParticipantePage(){
                             </div>
                         </div>
                     </div>
-                    <div className="w-full p-4 border-2 border-blue-400 rounded">
-                        <h2>Proximas Atividades:</h2>
+                    <div className="w-full p-4 border-2 border-blue-400 rounded gap-4 flex flex-col">
+                        <h2 className="font-semibold text-center text-2xl">Proximas Atividades:</h2>
                         <div className="grid   gap-4 w-full grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                             {atividadesDisponiveis.map((a)=>(
                                 <AtividadeListItem a={a}  
@@ -119,7 +119,7 @@ export default function ParticipantePage(){
 export function AtividadeListItem({a,handleInscrever}){
     return (
         <>
-            <li className="w-full bg-blue-900 text-white list-none p-4 rounded  flex flex-col justify-between gap-4">
+            <li className="w-full bg-blue-900 text-white list-none p-4 rounded min-h-32 flex flex-col justify-between gap-4">
                 <h2 className="text-center text-xl font-semibold">{a.nome}</h2>
                 <p className="bg-white text-blue-900 w-fit p-2 rounded font-semibold mx-auto">{a.vagas_restantes} / {a.vagas}</p>
                 <p>{a.descricao}</p>

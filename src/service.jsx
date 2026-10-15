@@ -112,6 +112,11 @@ async function getAtividades(){
     return await res.json();
 }
 
+async function getNextAtividades(){
+    const res = await fetch(apiUrl + "/atividade/3");
+    return await res.json();
+}
+
 async function getParticipantes(){
     const res = await fetch(apiUrl + "/participante");
     return await res.json();
@@ -124,6 +129,11 @@ async function getParticipanteById(id){
 
 async function getAtividadesDisponiveis(id){
     const res = await fetch(apiUrl + "/atividade/disponiveis/"+id);
+    return await res.json();
+}
+
+async function getSaude(id){
+    const res = await fetch(apiUrl + "/saude");
     return await res.json();
 }
 
@@ -165,9 +175,10 @@ async function redefinirSenha(id){
 
 export const service = {
     criarParticipante,
+    getNextAtividades,
     editarParticipante,
     redefinirSenha,
-
+getSaude,
     editarParticipanteAdmin,
     loginAdmin,
     loginParticipante,
